@@ -38,9 +38,11 @@ jobs:
         env:
           EXPO_BASE_URL: /${{ github.event.repository.name }}
 
-      - name: Inject PWA manifest + service worker registration
+      - name: Inject PWA manifest + SEO tags + service worker registration
         run: |
-          sed -i 's|</head>|<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><meta name="theme-color" content="#2f81f7"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="L1 Status"><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script></head>|' artifacts/l1-status-app/dist/index.html
+          sed -i \
+            's|</head>|<meta name="description" content="Build, preview and share L1 support status updates ready to paste into WhatsApp. Fast, mobile-friendly tool for L1 operations teams."><meta name="robots" content="index, follow"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><meta name="theme-color" content="#2f81f7"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="L1 Status"><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script></head>|' \
+            artifacts/l1-status-app/dist/index.html
 
       - name: Copy index.html to 404.html for SPA routing
         run: cp artifacts/l1-status-app/dist/index.html artifacts/l1-status-app/dist/404.html
