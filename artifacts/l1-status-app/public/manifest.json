@@ -1,0 +1,22 @@
+{
+  "name": "L1 Status Generator",
+  "short_name": "L1 Status",
+  "description": "Build and share L1 support status updates for WhatsApp",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0f1720",
+  "theme_color": "#2f81f7",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/images/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/images/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
