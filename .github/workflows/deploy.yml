@@ -54,6 +54,11 @@ jobs:
 
       - name: Copy Admin Dashboard into Pages output
         run: |
+          echo "=== Build output check ==="
+          ls -la artifacts/admin-dashboard/ || true
+          ls -la artifacts/admin-dashboard/dist/ || true
+          ls -la artifacts/admin-dashboard/dist/public/ || true
+          echo "=== Copying ==="
           mkdir -p artifacts/l1-status-app/dist/Admin-dashboard
           cp -r artifacts/admin-dashboard/dist/public/. artifacts/l1-status-app/dist/Admin-dashboard/
           cp artifacts/admin-dashboard/dist/public/index.html artifacts/l1-status-app/dist/Admin-dashboard/404.html
