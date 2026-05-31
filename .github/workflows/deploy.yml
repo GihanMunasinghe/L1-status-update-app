@@ -36,7 +36,7 @@ jobs:
         working-directory: artifacts/l1-status-app
         run: pnpm exec expo export -p web --output-dir dist
         env:
-          EXPO_PUBLIC_BASE_URL: /${{ github.event.repository.name }}
+          EXPO_BASE_URL: /${{ github.event.repository.name }}
 
       - name: Copy index.html to 404.html for SPA routing
         run: cp artifacts/l1-status-app/dist/index.html artifacts/l1-status-app/dist/404.html
