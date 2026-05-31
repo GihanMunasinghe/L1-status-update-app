@@ -16,6 +16,7 @@ import {
   View,
 } from "react-native";
 
+import { InstallBanner } from "@/components/InstallBanner";
 import { SystemCard } from "@/components/EditorComponents";
 import { useStatus } from "@/context/StatusContext";
 import { useColors } from "@/hooks/useColors";
@@ -350,6 +351,7 @@ export default function MainScreen() {
         </View>
       </View>
 
+      <InstallBanner />
       {activeTab === "editor" ? <EditorView /> : <PreviewView />}
     </View>
   );
