@@ -20,12 +20,13 @@ import { InstallBanner } from "@/components/InstallBanner";
 import { SystemCard } from "@/components/EditorComponents";
 import { useStatus } from "@/context/StatusContext";
 import { useColors } from "@/hooks/useColors";
+import { downloadStatusAsImage, isImageDownloadSupported } from "@/utils/generateStatusImage";
 
 type Tab = "editor" | "preview";
 
 function MetaSection() {
   const colors = useColors();
-  const { state, setReportTitle, setDate, setTime, setNow } = useStatus();
+  const { state, setReportTitle, setDate, setTime, setShiftEngineer, setNow } = useStatus();
 
   return (
     <View
@@ -96,6 +97,17 @@ function MetaSection() {
             Now
           </Text>
         </TouchableOpacity>
+      </View>
+
+      <View style={[styles.engineerRow, { borderTopColor: colors.border }]}>
+        <Feather name="user-check" size={14} color={colors.primary} />
+        <TextInput
+          style={[styles.engineerInput, { color: colors.foreground }]}
+          value={state.shiftEngineer}
+          onChangeText={setShiftEngineer}
+          placeholder="Shift Engineer name (e.g. John Doe)"
+          placeholderTextColor={colors.mutedForeground}
+        />
       </View>
     </View>
   );
@@ -173,7 +185,7 @@ function EditorView() {
 
 function PreviewView() {
   const colors = useColors();
-  const { generatedText } = useStatus();
+  const { generatedText, state } = useStatus();
   const insets = useSafeAreaInsets();
   const [copied, setCopied] = useState(false);
 
@@ -238,6 +250,28 @@ function PreviewView() {
             Share
           </Text>
         </TouchableOpacity>
+
+        {isImageDownloadSupported && (
+          <TouchableOpacity
+            style={[
+              styles.actionBtnSecondary,
+              {
+                backgroundColor: colors.cardSecondary,
+                borderColor: colors.border,
+              },
+            ]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              downloadStatusAsImage(generatedText, state.date);
+            }}
+            activeOpacity={0.85}
+          >
+            <Feather name="image" size={15} color={colors.primary} />
+            <Text style={[styles.actionBtnSecText, { color: colors.primary }]}>
+              Image
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView
@@ -470,6 +504,19 @@ const styles = StyleSheet.create({
   nowBtnText: {
     fontSize: 12,
     fontFamily: "Inter_600SemiBold",
+  },
+  engineerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+  },
+  engineerInput: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
   },
   addSystemBtn: {
     flexDirection: "row",
