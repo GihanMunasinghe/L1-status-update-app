@@ -41,6 +41,7 @@ export interface AppState {
   reportTitle: string;
   date: string;
   time: string;
+  shiftEngineer: string;
   systems: System[];
 }
 
@@ -85,6 +86,7 @@ function templateState(): AppState {
     reportTitle: "L1 Support Status Update",
     date: dateStr,
     time: timeStr,
+    shiftEngineer: "",
     systems: [
       {
         id: genId(),
@@ -163,6 +165,9 @@ export function generateStatusText(state: AppState): string {
   out.push(`*${state.reportTitle}*`);
   const dt = [state.date, state.time].filter(Boolean).join("  ·  ");
   if (dt) out.push(dt);
+  if (state.shiftEngineer?.trim()) {
+    out.push(`👷 Shift Engineer: ${state.shiftEngineer.trim()}`);
+  }
   out.push("━━━━━━━━━━━━━━━━━━━━");
 
   state.systems.forEach((sys, idx) => {
@@ -213,6 +218,7 @@ interface StatusContextType {
   setReportTitle: (v: string) => void;
   setDate: (v: string) => void;
   setTime: (v: string) => void;
+  setShiftEngineer: (v: string) => void;
   setNow: () => void;
   addSystem: () => void;
   deleteSystem: (si: number) => void;
@@ -264,6 +270,10 @@ export function StatusProvider({ children }: { children: React.ReactNode }) {
   );
   const setTime = useCallback(
     (v: string) => setState((s) => ({ ...s, time: v })),
+    []
+  );
+  const setShiftEngineer = useCallback(
+    (v: string) => setState((s) => ({ ...s, shiftEngineer: v })),
     []
   );
 
@@ -459,6 +469,7 @@ export function StatusProvider({ children }: { children: React.ReactNode }) {
         setReportTitle,
         setDate,
         setTime,
+        setShiftEngineer,
         setNow,
         addSystem,
         deleteSystem,
