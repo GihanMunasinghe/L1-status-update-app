@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build web app
+      - name: Build L1 status app
         working-directory: artifacts/l1-status-app
         run: pnpm exec expo export -p web --output-dir dist
         env:
@@ -44,6 +44,21 @@ jobs:
 
       - name: Copy index.html to 404.html for SPA routing
         run: cp artifacts/l1-status-app/dist/index.html artifacts/l1-status-app/dist/404.html
+
+      - name: Build Admin Dashboard
+        working-directory: artifacts/admin-dashboard
+        run: pnpm run build
+        env:
+          NODE_ENV: production
+          PORT: "3000"
+          BASE_PATH: /${{ github.event.repository.name }}/Admin-dashboard/
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+
+      - name: Copy Admin Dashboard into Pages output
+        run: |
+          mkdir -p artifacts/l1-status-app/dist/Admin-dashboard
+          cp -r artifacts/admin-dashboard/dist/public/. artifacts/l1-status-app/dist/Admin-dashboard/
+          cp artifacts/admin-dashboard/dist/public/index.html artifacts/l1-status-app/dist/Admin-dashboard/404.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
