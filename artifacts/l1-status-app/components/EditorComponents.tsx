@@ -237,19 +237,38 @@ function IssueCard({ si, ii }: { si: number; ii: number }) {
         numberOfLines={3}
         textAlignVertical="top"
       />
-      <TextInput
-        style={[
-          styles.issueInput,
-          {
-            color: colors.foreground,
-            borderColor: colors.destructive + "33",
-          },
-        ]}
-        value={iss.supporter}
-        onChangeText={(v) => updateIssue(si, ii, "supporter", v)}
-        placeholder="Supporting person / team (e.g. John & Murex L2)"
-        placeholderTextColor={colors.mutedForeground}
-      />
+      <View style={styles.issueFieldRow}>
+        <Feather name="user" size={13} color={colors.mutedForeground} style={styles.issueFieldIcon} />
+        <TextInput
+          style={[
+            styles.issueInlineInput,
+            {
+              color: colors.foreground,
+              borderColor: colors.destructive + "33",
+            },
+          ]}
+          value={iss.supporter}
+          onChangeText={(v) => updateIssue(si, ii, "supporter", v)}
+          placeholder="Checking: person or team (e.g. John, Murex L2)"
+          placeholderTextColor={colors.mutedForeground}
+        />
+      </View>
+      <View style={styles.issueFieldRow}>
+        <Feather name="clock" size={13} color={colors.mutedForeground} style={styles.issueFieldIcon} />
+        <TextInput
+          style={[
+            styles.issueInlineInput,
+            {
+              color: colors.foreground,
+              borderColor: colors.destructive + "33",
+            },
+          ]}
+          value={iss.eta}
+          onChangeText={(v) => updateIssue(si, ii, "eta", v)}
+          placeholder="ETA (e.g. 30 mins, 03:00 PM, TBD)"
+          placeholderTextColor={colors.mutedForeground}
+        />
+      </View>
     </View>
   );
 }
@@ -492,12 +511,24 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     minHeight: 60,
   },
-  issueInput: {
+  issueFieldRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 6,
+  },
+  issueFieldIcon: {
+    width: 18,
+    textAlign: "center",
+  },
+  issueInlineInput: {
+    flex: 1,
     fontSize: 13,
     fontFamily: "Inter_400Regular",
     borderWidth: 1,
     borderRadius: 6,
-    padding: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 7,
   },
   systemCard: {
     borderRadius: 12,
