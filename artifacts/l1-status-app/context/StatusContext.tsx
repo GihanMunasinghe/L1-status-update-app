@@ -10,6 +10,15 @@ import React, {
 const STORAGE_KEY = "@l1status_v1";
 const HISTORY_KEY = "@l1status_history_v1";
 const HISTORY_MAX = 50;
+const TEMPLATES_KEY = "@l1status_templates_v1";
+const TEMPLATES_MAX = 20;
+
+export interface TemplateEntry {
+  id: string;
+  name: string;
+  createdAt: number;
+  state: AppState;
+}
 
 export interface HistoryEntry {
   id: string;
@@ -249,6 +258,10 @@ interface StatusContextType {
   saveToHistory: () => void;
   deleteHistoryEntry: (id: string) => void;
   clearHistory: () => void;
+  templates: TemplateEntry[];
+  saveAsTemplate: (name: string) => void;
+  loadTemplate: (id: string) => void;
+  deleteTemplate: (id: string) => void;
 }
 
 const StatusContext = createContext<StatusContextType | null>(null);
@@ -257,13 +270,17 @@ export function StatusProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>(templateState);
   const [loaded, setLoaded] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [templates, setTemplates] = useState<TemplateEntry[]>([]);
 
   useEffect(() => {
-    AsyncStorage.multiGet([STORAGE_KEY, HISTORY_KEY]).then(([[, raw], [, histRaw]]) => {
-      if (raw) { try { setState(JSON.parse(raw)); } catch {} }
-      if (histRaw) { try { setHistory(JSON.parse(histRaw)); } catch {} }
-      setLoaded(true);
-    });
+    AsyncStorage.multiGet([STORAGE_KEY, HISTORY_KEY, TEMPLATES_KEY]).then(
+      ([[, raw], [, histRaw], [, tmplRaw]]) => {
+        if (raw) { try { setState(JSON.parse(raw)); } catch {} }
+        if (histRaw) { try { setHistory(JSON.parse(histRaw)); } catch {} }
+        if (tmplRaw) { try { setTemplates(JSON.parse(tmplRaw)); } catch {} }
+        setLoaded(true);
+      }
+    );
   }, []);
 
   useEffect(() => {
@@ -506,6 +523,45 @@ export function StatusProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.removeItem(HISTORY_KEY);
   }, []);
 
+  const saveAsTemplate = useCallback(
+    (name: string) => {
+      const entry: TemplateEntry = {
+        id: genId(),
+        name: name.trim(),
+        createdAt: Date.now(),
+        state,
+      };
+      setTemplates((prev) => {
+        const next = [entry, ...prev].slice(0, TEMPLATES_MAX);
+        AsyncStorage.setItem(TEMPLATES_KEY, JSON.stringify(next));
+        return next;
+      });
+    },
+    [state]
+  );
+
+  const loadTemplate = useCallback(
+    (id: string) => {
+      const tmpl = templates.find((t) => t.id === id);
+      if (!tmpl) return;
+      setState((prev) => ({
+        ...tmpl.state,
+        date: prev.date,
+        time: prev.time,
+        shiftEngineer: prev.shiftEngineer,
+      }));
+    },
+    [templates]
+  );
+
+  const deleteTemplate = useCallback((id: string) => {
+    setTemplates((prev) => {
+      const next = prev.filter((t) => t.id !== id);
+      AsyncStorage.setItem(TEMPLATES_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   return (
     <StatusContext.Provider
       value={{
@@ -533,6 +589,10 @@ export function StatusProvider({ children }: { children: React.ReactNode }) {
         saveToHistory,
         deleteHistoryEntry,
         clearHistory,
+        templates,
+        saveAsTemplate,
+        loadTemplate,
+        deleteTemplate,
       }}
     >
       {children}
