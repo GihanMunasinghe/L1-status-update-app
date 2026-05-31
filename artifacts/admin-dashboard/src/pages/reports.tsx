@@ -187,7 +187,7 @@ export default function ReportsPage() {
 
   return (
     <Layout>
-      <div className="p-6 max-w-5xl mx-auto space-y-5">
+      <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-5">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <h1 className="text-xl font-bold tracking-tight">Issue Reports</h1>
