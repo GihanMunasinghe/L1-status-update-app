@@ -19,6 +19,7 @@ import {
 import { InstallBanner } from "@/components/InstallBanner";
 import { HistorySheet } from "@/components/HistorySheet";
 import { TemplateSheet } from "@/components/TemplateSheet";
+import { ReportIssueSheet } from "@/components/ReportIssueSheet";
 import { SystemCard } from "@/components/EditorComponents";
 import { useStatus } from "@/context/StatusContext";
 import { useColors } from "@/hooks/useColors";
@@ -316,6 +317,7 @@ export default function MainScreen() {
   const [activeTab, setActiveTab] = useState<Tab>("editor");
   const [historyOpen, setHistoryOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const { history, templates } = useStatus();
 
   const topPad =
@@ -374,6 +376,15 @@ export default function MainScreen() {
                 </View>
               )}
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.historyBtn, { backgroundColor: (colors.amber) + "1a", borderColor: (colors.amber) + "44" }]}
+              onPress={() => { Haptics.selectionAsync(); setReportOpen(true); }}
+              activeOpacity={0.8}
+            >
+              <Feather name="alert-triangle" size={14} color={colors.amber} />
+              <Text style={[styles.historyBtnText, { color: colors.amber }]}>Report Issue</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -427,6 +438,7 @@ export default function MainScreen() {
 
       <HistorySheet visible={historyOpen} onClose={() => setHistoryOpen(false)} />
       <TemplateSheet visible={templatesOpen} onClose={() => setTemplatesOpen(false)} />
+      <ReportIssueSheet visible={reportOpen} onClose={() => setReportOpen(false)} />
     </View>
   );
 }
@@ -448,6 +460,7 @@ const styles = StyleSheet.create({
   },
   headerBtnRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
     marginTop: 8,
   },
