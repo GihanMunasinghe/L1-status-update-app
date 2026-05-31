@@ -17,6 +17,7 @@ import {
 } from "react-native";
 
 import { InstallBanner } from "@/components/InstallBanner";
+import { HistorySheet } from "@/components/HistorySheet";
 import { SystemCard } from "@/components/EditorComponents";
 import { useStatus } from "@/context/StatusContext";
 import { useColors } from "@/hooks/useColors";
@@ -185,7 +186,7 @@ function EditorView() {
 
 function PreviewView() {
   const colors = useColors();
-  const { generatedText, state } = useStatus();
+  const { generatedText, state, saveToHistory } = useStatus();
   const insets = useSafeAreaInsets();
   const [copied, setCopied] = useState(false);
 
@@ -194,17 +195,19 @@ function PreviewView() {
       await Clipboard.setStringAsync(generatedText);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setCopied(true);
+      saveToHistory();
       setTimeout(() => setCopied(false), 2000);
     } catch {
       handleShare();
     }
-  }, [generatedText]);
+  }, [generatedText, saveToHistory]);
 
   const handleShare = useCallback(async () => {
     try {
       await Share.share({ message: generatedText });
+      saveToHistory();
     } catch {}
-  }, [generatedText]);
+  }, [generatedText, saveToHistory]);
 
   return (
     <View style={styles.flex}>
@@ -310,6 +313,8 @@ export default function MainScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<Tab>("editor");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const { history } = useStatus();
 
   const topPad =
     insets.top + (Platform.OS === "web" ? 67 : 0);
@@ -338,6 +343,25 @@ export default function MainScreen() {
           <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
             Fill · Copy · Paste in WhatsApp
           </Text>
+
+          <TouchableOpacity
+            style={[styles.historyBtn, { backgroundColor: colors.cardSecondary, borderColor: colors.border }]}
+            onPress={() => {
+              Haptics.selectionAsync();
+              setHistoryOpen(true);
+            }}
+            activeOpacity={0.8}
+          >
+            <Feather name="clock" size={14} color={colors.primary} />
+            <Text style={[styles.historyBtnText, { color: colors.primary }]}>
+              History
+            </Text>
+            {history.length > 0 && (
+              <View style={[styles.historyBadge, { backgroundColor: colors.primary }]}>
+                <Text style={styles.historyBadgeText}>{history.length}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
 
         <View
@@ -387,6 +411,8 @@ export default function MainScreen() {
 
       <InstallBanner />
       {activeTab === "editor" ? <EditorView /> : <PreviewView />}
+
+      <HistorySheet visible={historyOpen} onClose={() => setHistoryOpen(false)} />
     </View>
   );
 }
@@ -405,6 +431,34 @@ const styles = StyleSheet.create({
   },
   headerTop: {
     marginBottom: 12,
+  },
+  historyBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    alignSelf: "flex-start",
+    marginTop: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  historyBtnText: {
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+  },
+  historyBadge: {
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  historyBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontFamily: "Inter_700Bold",
   },
   headerTitleRow: {
     flexDirection: "row",
