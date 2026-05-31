@@ -46,11 +46,9 @@ jobs:
         run: cp artifacts/l1-status-app/dist/index.html artifacts/l1-status-app/dist/404.html
 
       - name: Build Admin Dashboard
-        working-directory: artifacts/admin-dashboard
-        run: pnpm run build
+        run: pnpm --filter @workspace/admin-dashboard run build
         env:
           NODE_ENV: production
-          PORT: "3000"
           BASE_PATH: /${{ github.event.repository.name }}/Admin-dashboard/
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
 
