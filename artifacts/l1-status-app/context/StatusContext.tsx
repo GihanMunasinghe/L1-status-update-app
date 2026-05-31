@@ -8,6 +8,18 @@ import React, {
 } from "react";
 
 const STORAGE_KEY = "@l1status_v1";
+const HISTORY_KEY = "@l1status_history_v1";
+const HISTORY_MAX = 50;
+
+export interface HistoryEntry {
+  id: string;
+  savedAt: number;
+  title: string;
+  date: string;
+  time: string;
+  shiftEngineer: string;
+  text: string;
+}
 
 export interface Line {
   id: string;
@@ -233,6 +245,10 @@ interface StatusContextType {
   deleteLine: (si: number, bi: number, li: number) => void;
   updateLine: (si: number, bi: number, li: number, field: "text" | "highlight", value: string | boolean) => void;
   resetTemplate: () => void;
+  history: HistoryEntry[];
+  saveToHistory: () => void;
+  deleteHistoryEntry: (id: string) => void;
+  clearHistory: () => void;
 }
 
 const StatusContext = createContext<StatusContextType | null>(null);
@@ -240,14 +256,12 @@ const StatusContext = createContext<StatusContextType | null>(null);
 export function StatusProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>(templateState);
   const [loaded, setLoaded] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
-      if (raw) {
-        try {
-          setState(JSON.parse(raw));
-        } catch {}
-      }
+    AsyncStorage.multiGet([STORAGE_KEY, HISTORY_KEY]).then(([[, raw], [, histRaw]]) => {
+      if (raw) { try { setState(JSON.parse(raw)); } catch {} }
+      if (histRaw) { try { setHistory(JSON.parse(histRaw)); } catch {} }
       setLoaded(true);
     });
   }, []);
@@ -461,6 +475,37 @@ export function StatusProvider({ children }: { children: React.ReactNode }) {
     setState(templateState());
   }, []);
 
+  const saveToHistory = useCallback(() => {
+    const text = generateStatusText(state);
+    const entry: HistoryEntry = {
+      id: genId(),
+      savedAt: Date.now(),
+      title: state.reportTitle,
+      date: state.date,
+      time: state.time,
+      shiftEngineer: state.shiftEngineer ?? "",
+      text,
+    };
+    setHistory((prev) => {
+      const next = [entry, ...prev].slice(0, HISTORY_MAX);
+      AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, [state]);
+
+  const deleteHistoryEntry = useCallback((id: string) => {
+    setHistory((prev) => {
+      const next = prev.filter((e) => e.id !== id);
+      AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const clearHistory = useCallback(() => {
+    setHistory([]);
+    AsyncStorage.removeItem(HISTORY_KEY);
+  }, []);
+
   return (
     <StatusContext.Provider
       value={{
@@ -484,6 +529,10 @@ export function StatusProvider({ children }: { children: React.ReactNode }) {
         deleteLine,
         updateLine,
         resetTemplate,
+        history,
+        saveToHistory,
+        deleteHistoryEntry,
+        clearHistory,
       }}
     >
       {children}
