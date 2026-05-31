@@ -211,7 +211,11 @@ function PreviewView() {
   }, [generatedText, saveToHistory]);
 
   const handleWhatsApp = useCallback(() => {
-    const url = `whatsapp://send?text=${encodeURIComponent(generatedText)}`;
+    const encoded = encodeURIComponent(generatedText);
+    const url = Platform.OS === "web"
+      ? `https://wa.me/?text=${encoded}`
+      : `whatsapp://send?text=${encoded}`;
+
     Alert.alert(
       "Send via WhatsApp",
       "This will open WhatsApp with the report pre-filled. Select your L1 group and tap Send.",
@@ -223,14 +227,22 @@ function PreviewView() {
           onPress: async () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             saveToHistory();
-            const supported = await Linking.canOpenURL(url);
-            if (supported) {
-              await Linking.openURL(url);
-            } else {
-              Alert.alert(
-                "WhatsApp not found",
-                "Please install WhatsApp or use the Share option instead."
-              );
+            try {
+              if (Platform.OS === "web") {
+                window.open(url, "_blank");
+              } else {
+                const supported = await Linking.canOpenURL(url);
+                if (supported) {
+                  await Linking.openURL(url);
+                } else {
+                  Alert.alert(
+                    "WhatsApp not found",
+                    "Please install WhatsApp or use the Share option instead."
+                  );
+                }
+              }
+            } catch {
+              Alert.alert("Could not open WhatsApp", "Please use the Share option instead.");
             }
           },
         },
