@@ -5,6 +5,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import React, { useCallback, useState } from "react";
 import {
+  Alert,
   Platform,
   ScrollView,
   Share,
@@ -17,6 +18,7 @@ import {
 
 import { InstallBanner } from "@/components/InstallBanner";
 import { HistorySheet } from "@/components/HistorySheet";
+import { TemplateSheet } from "@/components/TemplateSheet";
 import { SystemCard } from "@/components/EditorComponents";
 import { useStatus } from "@/context/StatusContext";
 import { useColors } from "@/hooks/useColors";
@@ -313,7 +315,8 @@ export default function MainScreen() {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<Tab>("editor");
   const [historyOpen, setHistoryOpen] = useState(false);
-  const { history } = useStatus();
+  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const { history, templates } = useStatus();
 
   const topPad =
     insets.top + (Platform.OS === "web" ? 67 : 0);
@@ -343,24 +346,35 @@ export default function MainScreen() {
             Fill · Copy · Paste in WhatsApp
           </Text>
 
-          <TouchableOpacity
-            style={[styles.historyBtn, { backgroundColor: colors.cardSecondary, borderColor: colors.border }]}
-            onPress={() => {
-              Haptics.selectionAsync();
-              setHistoryOpen(true);
-            }}
-            activeOpacity={0.8}
-          >
-            <Feather name="clock" size={14} color={colors.primary} />
-            <Text style={[styles.historyBtnText, { color: colors.primary }]}>
-              History
-            </Text>
-            {history.length > 0 && (
-              <View style={[styles.historyBadge, { backgroundColor: colors.primary }]}>
-                <Text style={styles.historyBadgeText}>{history.length}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          <View style={styles.headerBtnRow}>
+            <TouchableOpacity
+              style={[styles.historyBtn, { backgroundColor: colors.cardSecondary, borderColor: colors.border }]}
+              onPress={() => { Haptics.selectionAsync(); setTemplatesOpen(true); }}
+              activeOpacity={0.8}
+            >
+              <Feather name="bookmark" size={14} color={colors.primary} />
+              <Text style={[styles.historyBtnText, { color: colors.primary }]}>Templates</Text>
+              {templates.length > 0 && (
+                <View style={[styles.historyBadge, { backgroundColor: colors.primary }]}>
+                  <Text style={styles.historyBadgeText}>{templates.length}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.historyBtn, { backgroundColor: colors.cardSecondary, borderColor: colors.border }]}
+              onPress={() => { Haptics.selectionAsync(); setHistoryOpen(true); }}
+              activeOpacity={0.8}
+            >
+              <Feather name="clock" size={14} color={colors.primary} />
+              <Text style={[styles.historyBtnText, { color: colors.primary }]}>History</Text>
+              {history.length > 0 && (
+                <View style={[styles.historyBadge, { backgroundColor: colors.primary }]}>
+                  <Text style={styles.historyBadgeText}>{history.length}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View
@@ -412,6 +426,7 @@ export default function MainScreen() {
       {activeTab === "editor" ? <EditorView /> : <PreviewView />}
 
       <HistorySheet visible={historyOpen} onClose={() => setHistoryOpen(false)} />
+      <TemplateSheet visible={templatesOpen} onClose={() => setTemplatesOpen(false)} />
     </View>
   );
 }
@@ -431,12 +446,15 @@ const styles = StyleSheet.create({
   headerTop: {
     marginBottom: 12,
   },
+  headerBtnRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
   historyBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    alignSelf: "flex-start",
-    marginTop: 8,
     borderRadius: 8,
     borderWidth: 1,
     paddingHorizontal: 10,
