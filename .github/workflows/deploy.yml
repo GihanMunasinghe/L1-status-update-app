@@ -38,6 +38,10 @@ jobs:
         env:
           EXPO_BASE_URL: /${{ github.event.repository.name }}
 
+      - name: Inject PWA manifest + service worker registration
+        run: |
+          sed -i 's|</head>|<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#2f81f7"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="L1 Status"><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");</script></head>|' artifacts/l1-status-app/dist/index.html
+
       - name: Copy index.html to 404.html for SPA routing
         run: cp artifacts/l1-status-app/dist/index.html artifacts/l1-status-app/dist/404.html
 
