@@ -26,6 +26,7 @@ export interface OngoingIssue {
   id: string;
   text: string;
   supporter: string;
+  eta: string;
 }
 
 export interface System {
@@ -56,7 +57,7 @@ function newSubSection(title = "", numbered = true): SubSection {
 }
 
 function newIssue(): OngoingIssue {
-  return { id: genId(), text: "", supporter: "" };
+  return { id: genId(), text: "", supporter: "", eta: "" };
 }
 
 function newSystem(): System {
@@ -175,7 +176,10 @@ export function generateStatusText(state: AppState): string {
       sys.ongoing.forEach((iss, i) => {
         out.push(`${i + 1}. ${iss.text || "(issue not described)"}`);
         if (iss.supporter?.trim()) {
-          out.push(`    👤 Supporting: ${iss.supporter.trim()}`);
+          out.push(`    👤 Checking: ${iss.supporter.trim()}`);
+        }
+        if (iss.eta?.trim()) {
+          out.push(`    ⏱ ETA: ${iss.eta.trim()}`);
         }
       });
     } else {
@@ -215,7 +219,7 @@ interface StatusContextType {
   updateSystem: (si: number, field: "name" | "components", value: string) => void;
   addIssue: (si: number) => void;
   deleteIssue: (si: number, ii: number) => void;
-  updateIssue: (si: number, ii: number, field: "text" | "supporter", value: string) => void;
+  updateIssue: (si: number, ii: number, field: "text" | "supporter" | "eta", value: string) => void;
   addSub: (si: number) => void;
   deleteSub: (si: number, bi: number) => void;
   updateSub: (si: number, bi: number, field: "title" | "numbered", value: string | boolean) => void;
@@ -322,7 +326,7 @@ export function StatusProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateIssue = useCallback(
-    (si: number, ii: number, field: "text" | "supporter", value: string) => {
+    (si: number, ii: number, field: "text" | "supporter" | "eta", value: string) => {
       setState((s) => ({
         ...s,
         systems: s.systems.map((sys, i) =>
