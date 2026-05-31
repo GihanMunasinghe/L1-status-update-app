@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import React, { useCallback, useState } from "react";
 import {
   Alert,
+  Linking,
   Platform,
   ScrollView,
   Share,
@@ -209,6 +210,34 @@ function PreviewView() {
     } catch {}
   }, [generatedText, saveToHistory]);
 
+  const handleWhatsApp = useCallback(() => {
+    const url = `whatsapp://send?text=${encodeURIComponent(generatedText)}`;
+    Alert.alert(
+      "Send via WhatsApp",
+      "This will open WhatsApp with the report pre-filled. Select your L1 group and tap Send.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Open WhatsApp",
+          style: "default",
+          onPress: async () => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            saveToHistory();
+            const supported = await Linking.canOpenURL(url);
+            if (supported) {
+              await Linking.openURL(url);
+            } else {
+              Alert.alert(
+                "WhatsApp not found",
+                "Please install WhatsApp or use the Share option instead."
+              );
+            }
+          },
+        },
+      ]
+    );
+  }, [generatedText, saveToHistory]);
+
   return (
     <View style={styles.flex}>
       <View
@@ -252,6 +281,15 @@ function PreviewView() {
           <Text style={[styles.actionBtnSecText, { color: colors.primary }]}>
             Share
           </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.actionBtnWhatsApp]}
+          onPress={handleWhatsApp}
+          activeOpacity={0.85}
+        >
+          <Feather name="send" size={15} color="#fff" />
+          <Text style={styles.actionBtnText}>WhatsApp</Text>
         </TouchableOpacity>
 
         {isImageDownloadSupported && (
@@ -301,8 +339,7 @@ function PreviewView() {
           </Text>
         </View>
         <Text style={[styles.previewHint, { color: colors.mutedForeground }]}>
-          WhatsApp formatting: *bold* is preserved. Tap "Copy text" then paste
-          in WhatsApp.
+          Tap <Text style={{ fontFamily: "Inter_600SemiBold" }}>WhatsApp</Text> to open the app with this report pre-filled — just pick your L1 group and send.
         </Text>
       </ScrollView>
     </View>
@@ -618,6 +655,16 @@ const styles = StyleSheet.create({
     gap: 7,
     borderRadius: 10,
     paddingVertical: 12,
+  },
+  actionBtnWhatsApp: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    borderRadius: 10,
+    paddingVertical: 12,
+    backgroundColor: "#25D366",
   },
   actionBtnText: {
     fontSize: 14,
