@@ -20,7 +20,13 @@
     "web": {
       "favicon": "./assets/images/icon.png",
       "output": "static",
-      "bundler": "metro"
+      "bundler": "metro",
+      "name": "L1 Status Generator",
+      "shortName": "L1 Status",
+      "description": "Build, preview and share L1 support status updates ready to paste into WhatsApp. Fast, mobile-friendly tool for L1 operations teams.",
+      "lang": "en",
+      "themeColor": "#2f81f7",
+      "backgroundColor": "#0f172a"
     },
     "plugins": [
       [
